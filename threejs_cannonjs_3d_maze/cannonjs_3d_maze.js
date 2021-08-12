@@ -109,7 +109,7 @@ var ground_texture = THREE.ImageUtils.loadTexture( 'img/ground.jpg' );
 ground_texture.wrapS = ground_texture.wrapT = THREE.RepeatWrapping;
 ground_texture.repeat.set( 64, 64 );
 
-var wall_texture = THREE.ImageUtils.loadTexture( 'img/images/wall.jpg' );
+var wall_texture = THREE.ImageUtils.loadTexture( 'img/wall.jpg' );
 
 var world = setPhysics(); //物理情報設定
 
