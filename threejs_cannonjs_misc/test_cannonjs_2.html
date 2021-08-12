@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <!-- refer to https://liginc.co.jp/378458 -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/109/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r109/examples/js/controls/OrbitControls.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+  
+</head>
+<body>
+  <div id="stage"></div>
+
+  <div class="kakudo">
+    手玉を突く角度
+    <input type="range" class="range js-range"
+           value="0" step="0.1" min="-4" max="4">
+    <button class="js-fire">発射</button>
+    </div> <!-- #kakudo -->
+
+  <script>
+    (function() {
+        var controls;
+        var scene;
+        var camera;
+        var renderer;
+        
+        var phySphere;
+        var phySphere2;
+        var phySphere3;
+        
+        var viewSphere;
+        var viewSphere2;
+        var viewSphere3;
+
+        var rand = Math.random()*20 - 10;       // 的玉の位置
+
+        var world = setPhy();
+        setView();
+        animate();
+
+
+        function setPhy() {
+    
+            var world = new CANNON.World();     // 物理世界
+            world.gravity.set(0, -9.82, 0);     // 重力
+
+            //「衝突可能性」の剛体同士を探索
+            world.broadphase = new CANNON.NaiveBroadphase();
+    
+            world.solver.iterations = 5;        // 反復計算回数
+            world.solver.tolerance = 0.1;       // 許容値
+  
+            //地面
+            var groundMat = new CANNON.Material('groundMat');
+            //質量定義
+            var phyPlane = new CANNON.Body({
+                mass: 0,
+                material: groundMat
+            });
+
+            phyPlane.addShape(new CANNON.Plane());
+            // X軸に90度回転
+            phyPlane.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0), -Math.PI / 2 );
+            world.add(phyPlane);
+  
+            var sphereMat = new CANNON.Material('sphereMat');
+            //質量定義
+            phySphere = new CANNON.Body({
+                mass: 1,
+                material: sphereMat
+            });
+
+            
+            phySphere.addShape(new CANNON.Sphere(1));
+            phySphere.position.set(20, 1, 0);   //位置
+            phySphere.velocity.set(0, 0, 0);    //角速度
+            phySphere.angularDamping = 0.1;     //減衰率
+            world.add(phySphere);
+  
+            var sphereMat2 = new CANNON.Material('sphereMat2');
+            //質量定義
+            phySphere2 = new CANNON.Body({
+                mass: 1, material: sphereMat2   });
+            
+            phySphere2.addShape(new CANNON.Sphere(1));
+            phySphere2.position.set(10, 1, 0);  //位置
+            phySphere2.velocity.set(0, 0, 0);   //角速度
+            phySphere2.angularDamping = 0.1;    //減衰率
+            world.add(phySphere2);
+  
+            var sphereMat3 = new CANNON.Material('sphereMat3');
+            //質量定義
+            phySphere3 = new CANNON.Body({
+                mass: 2,  material: sphereMat3  });
+            
+            phySphere3.addShape(new CANNON.Sphere(2));
+            phySphere3.position.set(-10, 2, rand);      //位置
+            phySphere3.velocity.set(0, 0, 0);           //角速度
+            phySphere3.angularDamping = 0.1;            //減衰率
+            world.add(phySphere3);
+  
+            //SphereとSphere2が接触した際のContactMaterial
+            var sphereSphereCM = new CANNON.ContactMaterial(
+                sphereMat,
+                sphereMat2,
+                {contactEquationRelaxation: 3,          //接触式の緩和性
+                 contactEquationStiffness: 10000000,    //接触式の剛性
+                 friction: 0.3,                         //摩擦係数
+                 frictionEquationRelaxation: 3,         //摩擦式の剛性
+                 frictionEquationStiffness: 10000000,   //摩擦式の緩和性
+                 restitution: 0.3                       //反発係数
+                }
+            );
+            world.addContactMaterial(sphereSphereCM);
+  
+            //地面とSphereが接触した際のContactMaterial
+            spherePlaneCM = new CANNON.ContactMaterial(
+                groundMat,
+                sphereMat,
+                {friction: 0,   //摩擦係数
+                 restitution: 0 //反発係数
+                }
+            );
+            world.addContactMaterial(spherePlaneCM);
+  
+            //地面とSphereが接触した際のContactMaterial
+            spherePlaneCM2 = new CANNON.ContactMaterial(
+                groundMat,
+                sphereMat2,
+                {friction: 0,   //摩擦係数
+                 restitution: 0 //反発係数
+                }
+            );
+            world.addContactMaterial(spherePlaneCM2);
+  
+            world.bsc_dist = new CANNON.Vec3();
+
+            return world;
+        }
+
+
+        function setView() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x000000, 1, 100);
+            camera = new THREE.PerspectiveCamera(40, 650 / 400, 1, 10000);
+            camera.position.set(50, 15, 0);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+            scene.add(camera);
+            var light = new THREE.DirectionalLight(0xffffff, 2);
+            
+            light.position.set(5, 10, -10);
+            light.castShadow = true;
+            light.shadowMapWidth = 1024;
+            light.shadowMapHeight = 1024;
+            light.shadowCameraLeft = -10;
+            light.shadowCameraRight = 10;
+            light.shadowCameraTop = 10;
+            light.shadowCameraBottom = -10;
+            light.shadowCameraFar = 100;
+            light.shadowCameraNear = 0;
+            light.shadowDarkness = 0.5;
+            scene.add(light);
+            var amb = new THREE.AmbientLight(0x999999);
+            scene.add(amb);
+            
+  
+            var viewPlane = new THREE.Mesh(
+                new THREE.PlaneGeometry(300, 300),
+                new THREE.MeshPhongMaterial( {color: 0x333333} )
+            );
+            viewPlane.rotation.x = -Math.PI / 2;
+            viewPlane.position.y = 1 / 30;
+            viewPlane.receiveShadow = true;
+            scene.add(viewPlane);
+            
+            viewSphere = new THREE.Mesh(
+                new THREE.SphereGeometry(1, 50, 50),
+                new THREE.MeshLambertMaterial( {color: 0xffffff} )
+            );
+            viewSphere.castShadow = true;
+            viewSphere.receiveShadow = true;
+            viewSphere.position = phySphere.position;
+            scene.add(viewSphere);
+            
+            viewSphere2 = new THREE.Mesh(
+                new THREE.SphereGeometry(1, 50, 50),
+                new THREE.MeshLambertMaterial( {color: 0xffffff} )
+            );
+            viewSphere2.castShadow = true;
+            viewSphere2.receiveShadow = true;
+            viewSphere2.position = phySphere2.position;
+            scene.add(viewSphere2);
+  
+            viewSphere3 = new THREE.Mesh(
+                new THREE.SphereGeometry(2, 50, 50),
+                new THREE.MeshLambertMaterial(
+                    {side: THREE.DoubleSide // 裏からも見える為
+                     //map: textureHayachi,
+                    }
+                )
+            );
+            viewSphere3.castShadow = true;
+            viewSphere3.receiveShadow = true;
+            viewSphere3.position = phySphere3.position;
+            scene.add(viewSphere3);
+ 
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize(650, 400);
+            renderer.setClearColor(0x000000, 1);
+            renderer.shadowMapEnabled = true;
+            document.body.appendChild(renderer.domElement);
+            renderer.render(scene, camera);
+            
+            // controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.minDistance = 0;           //近づける距離の最小値
+            controls.maxDistance = 9800;        //遠ざかる距離の最大値
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            world.step(1 / 60); // 物理エンジンの時間を進める
+            viewSphere.position.copy(phySphere.position);
+            viewSphere.quaternion.copy(phySphere.quaternion);
+            viewSphere2.position.copy(phySphere2.position);
+            viewSphere2.quaternion.copy(phySphere2.quaternion);
+            viewSphere3.position.copy(phySphere3.position);
+            viewSphere3.quaternion.copy(phySphere3.quaternion);
+            controls.update();
+
+            renderer.render(scene, camera);
+        }
+
+        var angle = 0;
+
+        $('.js-range').on('change', function(e) {
+            e.preventDefault();
+            angle = parseInt($(this).val(), 10);
+        });
+
+        $('.js-fire').on('click', function(e) {
+            e.preventDefault();
+            phySphere.velocity.set(-20, 0, -angle);
+        });
+        
+  })();
+  </script>
+  
+</body>
+</html>
+
+
+

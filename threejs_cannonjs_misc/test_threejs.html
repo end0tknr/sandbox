@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/109/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r109/examples/js/controls/OrbitControls.js"></script>
+  
+</head>
+<body>
+  <div id="stage"></div>
+
+  <script>
+  (function() {
+    'use strict';
+
+    var width = 500;
+    var height = 250;
+
+      var scene = new THREE.Scene();
+
+      // mesh 物体
+      var head = new THREE.Mesh(
+	  new THREE.BoxGeometry(20, 20, 20),
+	  new THREE.MeshLambertMaterial({ color: 0xff0000 })
+      );
+      head.position.set(0, 40, 0);
+      // scene.add(head);
+      
+      var body = new THREE.Mesh(
+	  new THREE.BoxGeometry(40, 60, 40),
+	  new THREE.MeshLambertMaterial({ color: 0xff0000 })
+      );
+      body.position.set(0, 0, 0);
+      // scene.add(body);
+
+      // 頭部と体をグループ化
+      var person = new THREE.Group();
+      person.add(head);
+      person.add(body);
+      scene.add(person);
+
+      // light
+      var light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(0, 100, 30);
+      scene.add(light);
+      // 環境光源
+      var ambient = new THREE.AmbientLight(0x404040);
+      scene.add(ambient);
+
+      // camera
+      var camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+      camera.position.set(200, 100, 300);
+      camera.lookAt(scene.position);
+
+      // helper
+      var gridHelper = new THREE.GridHelper(200, 50);
+      scene.add(gridHelper);
+      var axisHelper = new THREE.AxisHelper(1000);
+      scene.add(axisHelper);
+      var lightHelper = new THREE.DirectionalLightHelper(light, 20);
+      scene.add(lightHelper);
+
+	// controls - マウスによる操作
+	var controls = new THREE.OrbitControls(camera);
+	// controls.autoRotate = true;
+
+      // renderer
+      var renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(width, height);
+      renderer.setClearColor(0xefefef);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      document.getElementById('stage').appendChild(renderer.domElement);
+      
+      function render() {
+	  requestAnimationFrame(render);
+
+	  person.rotation.y += 0.01;
+
+	  controls.update();
+	  
+	  renderer.render(scene, camera);
+      }
+      render();
+  })();
+  </script>
+  
+</body>
+</html>
