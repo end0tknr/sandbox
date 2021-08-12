@@ -160,254 +160,250 @@ function setPhysics() {
              boxObjArray[cnt].sizeZ],
             
             [boxObjArray[cnt].velocX,
-                   boxObjArray[cnt].velocY,
-                   boxObjArray[cnt].velocZ],
-                  
-                  [boxObjArray[cnt].angVelocX,
-                   boxObjArray[cnt].angVelocY,
-                   boxObjArray[cnt].angVelocZ],
-                  
-                  boxObjArray[cnt].mass,
-                  boxObjArray[cnt].dampVal);
-              
-              world.add(canBoxArray[cnt]);
-          }
+             boxObjArray[cnt].velocY,
+             boxObjArray[cnt].velocZ],
+            
+            [boxObjArray[cnt].angVelocX,
+             boxObjArray[cnt].angVelocY,
+             boxObjArray[cnt].angVelocZ],
+            
+            boxObjArray[cnt].mass,
+            boxObjArray[cnt].dampVal);
+        
+        world.add(canBoxArray[cnt]);
+    }
+    
+    //自分自身を表す球体オブジェクトを作成
+    sphereShape = new CANNON.Sphere(1); //半径1の球体を作成
+    
+    var sphereMat = new CANNON.Material('sphereMat');
+    sphereMat.friction = 0.8;       //摩擦係数
+    sphereMat.restitution = 0.5;    //反発係数
+    
+    selfObj = new CANNON.Body({mass: 1});      //ボディを作成
+    selfObj.material = sphereMat;              //ボディにマテリアルを設定
           
-          //自分自身を表す球体オブジェクトを作成
-          sphereShape = new CANNON.Sphere(1); //半径1の球体を作成
-          
-          var sphereMat = new CANNON.Material('sphereMat');
-          sphereMat.friction = 0.8;       //摩擦係数
-          sphereMat.restitution = 0.5;    //反発係数
-          
-          selfObj = new CANNON.Body({mass: 1});      //ボディを作成
-          selfObj.material = sphereMat;              //ボディにマテリアルを設定
-          
-          
-          selfObj.addShape(sphereShape);         //球体を作成
-          selfObj.position.x = selfData.posX;    //初期位置を設定
-          selfObj.position.y = selfData.height;  //初期位置を設定
-          selfObj.position.z = selfData.posY;    //初期位置を設定
-          world.add(selfObj); //物理世界に追加
+    selfObj.addShape(sphereShape);         //球体を作成
+    selfObj.position.x = selfData.posX;    //初期位置を設定
+    selfObj.position.y = selfData.height;  //初期位置を設定
+    selfObj.position.z = selfData.posY;    //初期位置を設定
+    world.add(selfObj); //物理世界に追加
+    
+    return world;
+}
 
-          return world;
-      }
-      
-      function setView() {
-          var scene = new THREE.Scene();                //Three.jsの世界（シーン）を作成
-          scene.fog = new THREE.Fog(0x000000, 1, 100);  //フォグ（黒色）を作成
+function setView() {
+    var scene = new THREE.Scene();                //Three.jsの世界（シーン）を作成
+    scene.fog = new THREE.Fog(0x000000, 1, 100);  //フォグ（黒色）を作成
+    
+    //カメラ
+    var camera = new THREE.PerspectiveCamera(90, 800 / 600, 0.1, 10000);
+    //カメラの位置を設定
+    camera.position.set(Math.cos(Math.PI / 5) * 30, 5, Math.sin(Math.PI / 5) * 80);
+    changeLookAt( camera );  //カメラの注視点を設定
           
-          //カメラ
-          var camera = new THREE.PerspectiveCamera(90, 800 / 600, 0.1, 10000);
-          //カメラの位置を設定
-          camera.position.set(Math.cos(Math.PI / 5) * 30, 5, Math.sin(Math.PI / 5) * 80);
-          changeLookAt( camera );  //カメラの注視点を設定
+    scene.add(camera);
           
-          scene.add(camera);
+    //ライト
+    var light = new THREE.DirectionalLight(0xffffff, 0.5);
+    light.position.set(10, 10, -10);      //光源位置
+    light.castShadow = true;              //影を作る
+    light.shadowMapWidth     = 2024;      //影の精細さ(解像度)
+    light.shadowMapHeight    = 2024;
+    light.shadowCameraLeft   = -50;       //ライト視点方向の影の表示度合い
+    light.shadowCameraRight  = 50;
+    light.shadowCameraTop    = 50;
+    light.shadowCameraBottom = -50;
+    light.shadowCameraFar = 100;      //影の範囲
+    light.shadowCameraNear = 0;
+    light.shadowDarkness = 0.5;       //影の透明度
+    scene.add(light);
+    
+    var amb   = new THREE.AmbientLight(0xffffff);  //全体に光を当てる光源
+    scene.add(amb);
           
-          //ライト
-          var light = new THREE.DirectionalLight(0xffffff, 0.5);
-          light.position.set(10, 10, -10);      //光源位置
-          light.castShadow = true;              //影を作る
-          light.shadowMapWidth     = 2024;      //影の精細さ(解像度)
-          light.shadowMapHeight    = 2024;
-          light.shadowCameraLeft   = -50;       //ライト視点方向の影の表示度合い
-          light.shadowCameraRight  = 50;
-          light.shadowCameraTop    = 50;
-          light.shadowCameraBottom = -50;
-          light.shadowCameraFar = 100;      //影の範囲
-          light.shadowCameraNear = 0;
-          light.shadowDarkness = 0.5;       //影の透明度
-          scene.add(light);
-          
-          var amb   = new THREE.AmbientLight(0xffffff);  //全体に光を当てる光源
-          scene.add(amb);
-          
-          
-          //壁オブジェクト作成
-          for( cnt2=0; cnt2<boxObjArray.length; cnt2++){
+    //壁オブジェクト作成
+    for( cnt2=0; cnt2<boxObjArray.length; cnt2++){
 
-              thrBoxArray[cnt2] = makeThreeBox(
-                  [boxObjArray[cnt2].posX,
-                   boxObjArray[cnt2].posY,
-                   boxObjArray[cnt2].posZ ],
-                  [boxObjArray[cnt2].sizeX,
-                   boxObjArray[cnt2].sizeY,
-                   boxObjArray[cnt2].sizeZ] );
-              
-              scene.add(thrBoxArray[cnt2]);
-          }
-          
-          
-          //地面の形状
-          var graMeshGeometry = new THREE.PlaneGeometry(300, 300);
-          var graMaterial = new THREE.MeshBasicMaterial({
-              map: ground_texture
-          });
-          
-          var viewPlane = new THREE.Mesh(graMeshGeometry, graMaterial);
-          viewPlane.rotation.x = -Math.PI / 2;  //地面を回転
-          viewPlane.position.y = 1 / 2;         //地面の位置を設定
-          viewPlane.receiveShadow = true;       //地面に影を表示する
-          scene.add(viewPlane);
-          
-          //レンダラー
-          var renderer = new THREE.WebGLRenderer({antialias: true});
-          //描画sizeは、ブラウザ全体
-          renderer.setSize(wSizeWidth, wSizeHeight);
-          
-          renderer.setClearColor(0xffffff, 1);
-          renderer.shadowMapEnabled = true;
-          document.body.appendChild(renderer.domElement);
-          
-          renderer.render(scene, camera);
-	  return [renderer, scene, camera];
-      }
-      
-      function animate() {
-          requestAnimationFrame(animate);
-          // 物理エンジンの時間を進行
-          world.step(1 / 60);
-          
-          //カメラ位置の設定
-          camera.position.set(selfObj.position.x, selfObj.position.y + 1.6, selfObj.position.z);
-          
-          // レンダリング
-          renderer.render(scene, camera);
-      }
-      
-      //操作ボタン
-      changeBtnPos(wSizeWidth,wSizeHeight);  //ボタン位置の変更
-      
-      $('#forward').click(function(e) { forward(); });
-      $('#stop').click(function(e) { stop(); });
-      $('#back').click(function(e) { back(); });
-      $('#jump').click(function(e) { 
-          stop();
-          selfObj.velocity.y = 10; //ジャンプ時の上方向加速度
-      });
-      $('#turn_right').click(function(e) {
-          selfData.angle += 5;
-          stop();
-          changeLookAt(camera);
-      });
-      $('#turn_left').click(function(e) {
-          selfData.angle -= 5;
-          stop();
-          changeLookAt(camera);
-      });
-      
-      //前進
-      function forward(){
-          var theta = selfData.angle / 180 * Math.PI;
-          selfObj.velocity.x = Math.cos(theta) * selfData.speed;
-          selfObj.velocity.z = Math.sin(theta) * selfData.speed;
-      }
-      
-      //停止
-      function stop(){
-          selfObj.velocity.x = 0;
-          selfObj.velocity.z = 0;
-      }
-      
-      //後進
-      function back(){
-          var theta = selfData.angle / 180 * Math.PI;
-          selfObj.velocity.x = -1 * Math.cos(theta);
-          selfObj.velocity.z = -1 * Math.sin(theta);
-      }
-      
-      //注視点を設定
-      function changeLookAt(camera){
-          var theta = selfData.angle / 180 * Math.PI;
-          var posX = selfData.posX + Math.cos(theta) * 10000;
-          var posY = selfData.posY + Math.sin(theta) * 10000;
-          camera.lookAt(new THREE.Vector3(posX, 0, posY));
-      }
-      
-      //ボタン位置の変更
-      function changeBtnPos(wSizeWidth,wSizeHeight){
-          var btn_size = 100;
-          
-          //set button position
-          $('#turn_right').css('top', wSizeHeight - (btn_size + 5));
-          $('#turn_right').css('left', (btn_size + 10));
-          $('#turn_left').css('top', wSizeHeight - (btn_size + 5));
-          $('#turn_left').css('left', 5);
-          $('#back').css('top', (wSizeHeight - btn_size) - 5);
-          $('#back').css('left', (wSizeWidth - btn_size) - 5);
-          $('#stop').css('top', (wSizeHeight - (btn_size * 2)) - (5 * 2));
-          $('#stop').css('left', (wSizeWidth - btn_size) - 5);
-          $('#forward').css('top', (wSizeHeight - (btn_size * 3)) - (5 * 3));
-          $('#forward').css('left', (wSizeWidth - btn_size) - 5);
-          $('#jump').css('top', (wSizeHeight - (btn_size * 4)) - (5 * 4));
-          $('#jump').css('left', (wSizeWidth - btn_size) - 5);
-      }
-      
-      // mode==0
-      function makeThreeBox( pos_xyz, size_xyz ){
-          
-          var retObj = null;
-          var thrBox = null;
-          var canBox = null;
-          
-          //Three.jsのオブジェクトを作成
-          thrBox = new THREE.Mesh(
-              new THREE.BoxGeometry(size_xyz[0],size_xyz[1],size_xyz[2], 10, 10),
-              new THREE.MeshBasicMaterial( {map: wall_texture,
-                                            //color: color
-                                           })
-          );
-          
-          thrBox.castShadow = true;
-          thrBox.receiveShadow = true;
-          thrBox.position.x = pos_xyz[0];
-          thrBox.position.y = pos_xyz[1] + ( pos_xyz[1] /2 );
-          thrBox.position.z = pos_xyz[2];
-          
-          return thrBox;
-      }
-      
-      function makeCannonBox(
-          pos_xyz,
-          size_xyz,
-          veloc_xyz,
-          angVeloc_xyz,
-          mass,
-          dampVal){
-          
-          //cannon.jsのオブジェクトを作成
-          var canBox = new CANNON.Body({mass: mass});
-          canBox.addShape(
-              new CANNON.Box(
-                  new CANNON.Vec3(size_xyz[0]/2, size_xyz[1]/2, size_xyz[2]/2)
-              )
-          );
-          
-          canBox.position.set(pos_xyz[0],pos_xyz[1],pos_xyz[2]);
-          canBox.velocity.set(veloc_xyz[0],veloc_xyz[1],veloc_xyz[2]);
-          canBox.angularVelocity.set(
-              angVeloc_xyz[0],angVeloc_xyz[1],angVeloc_xyz[2] );
-          
-          canBox.angularDamping = dampVal;
-          return canBox;
-      }
-      
-      function createBoxObject( pos_xyz ){
-          
-          var box = {};
-          box.posX = pos_xyz[0];
-          box.posY = pos_xyz[1];
-          box.posZ = pos_xyz[2];
-          box.sizeX = 1;
-          box.sizeY = 3;
-          box.sizeZ = 1;
-          box.velocX    = box.velocY    = box.velocZ    = 0;
-          box.angVelocX = box.angVelocY = box.angVelocZ = 0;
-          box.mass    = 0;
-          box.dampVal = 0;
-          box.color   = 0x000000;
-          
-          return box;
-      }
-      
+        thrBoxArray[cnt2] = makeThreeBox(
+            [boxObjArray[cnt2].posX,
+             boxObjArray[cnt2].posY,
+             boxObjArray[cnt2].posZ ],
+            [boxObjArray[cnt2].sizeX,
+             boxObjArray[cnt2].sizeY,
+             boxObjArray[cnt2].sizeZ] );
+        
+        scene.add(thrBoxArray[cnt2]);
+    }
+    
+    //地面の形状
+    var graMeshGeometry = new THREE.PlaneGeometry(300, 300);
+    var graMaterial = new THREE.MeshBasicMaterial({
+        map: ground_texture
+    });
+    
+    var viewPlane = new THREE.Mesh(graMeshGeometry, graMaterial);
+    viewPlane.rotation.x = -Math.PI / 2;  //地面を回転
+    viewPlane.position.y = 1 / 2;         //地面の位置を設定
+    viewPlane.receiveShadow = true;       //地面に影を表示する
+    scene.add(viewPlane);
+    
+    //レンダラー
+    var renderer = new THREE.WebGLRenderer({antialias: true});
+    //描画sizeは、ブラウザ全体
+    renderer.setSize(wSizeWidth, wSizeHeight);
+    
+    renderer.setClearColor(0xffffff, 1);
+    renderer.shadowMapEnabled = true;
+    document.body.appendChild(renderer.domElement);
+    
+    renderer.render(scene, camera);
+    return [renderer, scene, camera];
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    // 物理エンジンの時間を進行
+    world.step(1 / 60);
+    
+    //カメラ位置の設定
+    camera.position.set(selfObj.position.x, selfObj.position.y + 1.6, selfObj.position.z);
+    // レンダリング
+    renderer.render(scene, camera);
+}
+
+//操作ボタン
+changeBtnPos(wSizeWidth,wSizeHeight);  //ボタン位置の変更
+
+$('#forward').click(function(e) { forward(); });
+$('#stop').click(function(e) { stop(); });
+$('#back').click(function(e) { back(); });
+$('#jump').click(function(e) { 
+    stop();
+    selfObj.velocity.y = 10; //ジャンプ時の上方向加速度
+});
+$('#turn_right').click(function(e) {
+    selfData.angle += 5;
+    stop();
+    changeLookAt(camera);
+});
+$('#turn_left').click(function(e) {
+    selfData.angle -= 5;
+    stop();
+    changeLookAt(camera);
+});
+
+//前進
+function forward(){
+    var theta = selfData.angle / 180 * Math.PI;
+    selfObj.velocity.x = Math.cos(theta) * selfData.speed;
+    selfObj.velocity.z = Math.sin(theta) * selfData.speed;
+}
+
+//停止
+function stop(){
+    selfObj.velocity.x = 0;
+    selfObj.velocity.z = 0;
+}
+
+//後進
+function back(){
+    var theta = selfData.angle / 180 * Math.PI;
+    selfObj.velocity.x = -1 * Math.cos(theta);
+    selfObj.velocity.z = -1 * Math.sin(theta);
+}
+
+//注視点を設定
+function changeLookAt(camera){
+    var theta = selfData.angle / 180 * Math.PI;
+    var posX = selfData.posX + Math.cos(theta) * 10000;
+    var posY = selfData.posY + Math.sin(theta) * 10000;
+    camera.lookAt(new THREE.Vector3(posX, 0, posY));
+}
+
+//ボタン位置の変更
+function changeBtnPos(wSizeWidth,wSizeHeight){
+    var btn_size = 100;
+    
+    //set button position
+    $('#turn_right').css('top', wSizeHeight - (btn_size + 5));
+    $('#turn_right').css('left', (btn_size + 10));
+    $('#turn_left').css('top', wSizeHeight - (btn_size + 5));
+    $('#turn_left').css('left', 5);
+    $('#back').css('top', (wSizeHeight - btn_size) - 5);
+    $('#back').css('left', (wSizeWidth - btn_size) - 5);
+    $('#stop').css('top', (wSizeHeight - (btn_size * 2)) - (5 * 2));
+    $('#stop').css('left', (wSizeWidth - btn_size) - 5);
+    $('#forward').css('top', (wSizeHeight - (btn_size * 3)) - (5 * 3));
+    $('#forward').css('left', (wSizeWidth - btn_size) - 5);
+    $('#jump').css('top', (wSizeHeight - (btn_size * 4)) - (5 * 4));
+    $('#jump').css('left', (wSizeWidth - btn_size) - 5);
+}
+
+// mode==0
+function makeThreeBox( pos_xyz, size_xyz ){
+    
+    var retObj = null;
+    var thrBox = null;
+    var canBox = null;
+    
+    //Three.jsのオブジェクトを作成
+    thrBox = new THREE.Mesh(
+        new THREE.BoxGeometry(size_xyz[0],size_xyz[1],size_xyz[2], 10, 10),
+        new THREE.MeshBasicMaterial( {map: wall_texture,
+                                      //color: color
+                                     })
+    );
+    
+    thrBox.castShadow = true;
+    thrBox.receiveShadow = true;
+    thrBox.position.x = pos_xyz[0];
+    thrBox.position.y = pos_xyz[1] + ( pos_xyz[1] /2 );
+    thrBox.position.z = pos_xyz[2];
+    
+    return thrBox;
+}
+
+function makeCannonBox(
+    pos_xyz,
+    size_xyz,
+    veloc_xyz,
+    angVeloc_xyz,
+    mass,
+    dampVal){
+    
+    //cannon.jsのオブジェクトを作成
+    var canBox = new CANNON.Body({mass: mass});
+    canBox.addShape(
+        new CANNON.Box(
+            new CANNON.Vec3(size_xyz[0]/2, size_xyz[1]/2, size_xyz[2]/2)
+        )
+    );
+    
+    canBox.position.set(pos_xyz[0],pos_xyz[1],pos_xyz[2]);
+    canBox.velocity.set(veloc_xyz[0],veloc_xyz[1],veloc_xyz[2]);
+    canBox.angularVelocity.set(
+        angVeloc_xyz[0],angVeloc_xyz[1],angVeloc_xyz[2] );
+    
+    canBox.angularDamping = dampVal;
+    return canBox;
+}
+
+function createBoxObject( pos_xyz ){
+    
+    var box = {};
+    box.posX = pos_xyz[0];
+    box.posY = pos_xyz[1];
+    box.posZ = pos_xyz[2];
+    box.sizeX = 1;
+    box.sizeY = 3;
+    box.sizeZ = 1;
+    box.velocX    = box.velocY    = box.velocZ    = 0;
+    box.angVelocX = box.angVelocY = box.angVelocZ = 0;
+    box.mass    = 0;
+    box.dampVal = 0;
+    box.color   = 0x000000;
+    
+    return box;
+}
+
