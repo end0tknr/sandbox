@@ -76,29 +76,38 @@ for(var x=0; x<10; x++){
 	geometry.colors.push(new THREE.Color(Math.random() * 0x00ffff));
     }
 }
+// 複数の点が、1コとobjectとして扱われます
 var points = new THREE.Points(geometry, material);
-points.name = "myParticle";
 scene.add(points);
 
 
-// Particles を削除
-function removeParticle(){
+// Cubeを作成し、その後、順に削除
+for(var i=0; i<50; i++){
+    var x = getRandom(-80, 80);
+    var y = getRandom(0, 80);
+    var z = getRandom(-80, 80);
+    var cube = createCube(5, 0xffffff, x, y, z);
+    cube.name = "tmpCube";
+    scene.add(cube);
+}
+ 
+function getRandom(min, max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+}
+ 
+function removeCube(){
     console.log("children:" + scene.children.length);
  
     var total = scene.children.length;
     for(var i=0; i<total; i++){
 	var obj = scene.children[i];
-	console.log( obj );
-	
-	if(obj.name == "myParticle"){
-	    console.log("remove children");
+	if(obj.name == "tmpCube"){
 	    scene.remove(obj);
 	    return;
 	}
     }
 }
-
-setInterval(removeParticle, 1000);
+setInterval(removeCube, 3000);
 
 
 // Cube
