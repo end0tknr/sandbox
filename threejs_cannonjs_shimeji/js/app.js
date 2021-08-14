@@ -82,9 +82,9 @@ scene.add(points);
 
 
 // Cubeを作成し、その後、順に削除
-for(var i=0; i<50; i++){
+for(var i=0; i<20; i++){
     var x = getRandom(-80, 80);
-    var y = getRandom(0, 80);
+    var y = getRandom(  0, 80);
     var z = getRandom(-80, 80);
 
     var mesh = new THREE.Mesh(
@@ -101,8 +101,6 @@ function getRandom(min, max){
 }
  
 function removeCube(){
-    console.log("children:" + scene.children.length);
- 
     var total = scene.children.length;
     for(var i=0; i<total; i++){
 	var obj = scene.children[i];
@@ -112,7 +110,7 @@ function removeCube(){
 	}
     }
 }
-setInterval(removeCube, 3000);
+setInterval(removeCube, 2000);
 
 
 // Cube
