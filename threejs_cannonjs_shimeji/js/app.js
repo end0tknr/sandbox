@@ -87,8 +87,14 @@ for(var i=0; i<50; i++){
     var y = getRandom(0, 80);
     var z = getRandom(-80, 80);
     var cube = createCube(5, 0xffffff, x, y, z);
-    cube.name = "tmpCube";
-    scene.add(cube);
+
+    var mesh = new THREE.Mesh(
+	new THREE.BoxBufferGeometry(5,5,5),
+	new THREE.MeshBasicMaterial({color: 0xccffcc, wireframe: true}) );
+    mesh.position.set(x, y, z);
+    
+    mesh.name = "tmpCube";
+    scene.add(mesh);
 }
  
 function getRandom(min, max){
