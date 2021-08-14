@@ -59,6 +59,7 @@ function onSuccess(stream){
     console.log("onSuccess");
 
     // document.querySelector("audio").src = URL.createObjectURL(stream);
+    // ↑old. ↓new
     document.querySelector("audio").src =
 	window.URL.createObjectURL(new Blob([stream], {type: "application/zip"}))
     

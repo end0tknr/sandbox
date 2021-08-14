@@ -86,6 +86,7 @@ function onSuccess(stream){
  
 	// 拍手の判定
 	if(cManager.trigger(timeDomain, frequency) == true){
+	    console.log("start addCube()");
 	    // Cubeを追加する
 	    addCube();
 	}
