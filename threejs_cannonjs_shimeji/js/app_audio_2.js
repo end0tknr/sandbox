@@ -58,7 +58,11 @@ navigator.getUserMedia({audio : true}, onSuccess, onError);
 function onSuccess(stream){
     console.log("onSuccess");
  
-    document.querySelector("audio").src = URL.createObjectURL(stream);
+    //document.querySelector("audio").src = URL.createObjectURL(stream);
+    // ↑old. ↓new
+    document.querySelector("audio").src =
+	window.URL.createObjectURL(new Blob([stream], {type: "application/zip"}))
+    
     var audioContext = new AudioContext();
     var analyser     = audioContext.createAnalyser();
     var timeDomain   = new Float32Array(analyser.frequencyBinCount);
