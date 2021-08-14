@@ -88,7 +88,7 @@ for(var i=0; i<20; i++){
     var z = getRandom(-80, 80);
 
     var mesh = new THREE.Mesh(
-	new THREE.BoxBufferGeometry(5,5,5),
+	new THREE.BoxBufferGeometry(20,20,20),
 	new THREE.MeshBasicMaterial({color: 0xccffcc, wireframe: true}) );
     mesh.position.set(x, y, z);
     
