@@ -86,7 +86,10 @@ function onSuccess(stream){
 	stats.update();
 
 	// 拍手の判定
+
+	console.log("HOGE 1");
 	if(cManager.trigger(timeDomain, frequency) == true){
+	    console.log("HOGE 2");
 	    // Cubeを追加する
 	    addCube();
 	}
