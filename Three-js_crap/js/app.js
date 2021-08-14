@@ -74,7 +74,7 @@ function onSuccess(stream){
     // 拍手を検出するクラス
     // 第一引数:次の拍手までの待機時間(ミリ秒)
     // 第二引数:反応する拍手音量の閾値
-    var cManager = new CrapManager(1000, 100);
+    var cManager = new CrapManager(1000, 10);
 
     loop();
     function loop(){
