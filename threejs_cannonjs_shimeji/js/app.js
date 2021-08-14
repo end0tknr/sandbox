@@ -89,6 +89,7 @@ function removeParticle(){
     for(var i=0; i<total; i++){
 	var obj = scene.children[i];
 	if(obj.name == "myParticle"){
+	    console.log("remove children");
 	    scene.remove(obj);
 	    return;
 	}
