@@ -74,7 +74,7 @@ function onSuccess(stream){
     // 拍手を検出するクラス
     // 第一引数:次の拍手までの待機時間(ミリ秒)
     // 第二引数:反応する拍手音量の閾値
-    var cManager = new CrapManager(1000, 5);
+    var cManager = new CrapManager(500, 2);
 
     loop();
     function loop(){
@@ -87,9 +87,8 @@ function onSuccess(stream){
 
 	// 拍手の判定
 
-	console.log("HOGE 1");
 	if(cManager.trigger(timeDomain, frequency) == true){
-	    console.log("HOGE 2");
+	    console.log("start addCube()");
 	    // Cubeを追加する
 	    addCube();
 	}
