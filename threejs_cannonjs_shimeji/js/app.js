@@ -86,7 +86,6 @@ for(var i=0; i<50; i++){
     var x = getRandom(-80, 80);
     var y = getRandom(0, 80);
     var z = getRandom(-80, 80);
-    var cube = createCube(5, 0xffffff, x, y, z);
 
     var mesh = new THREE.Mesh(
 	new THREE.BoxBufferGeometry(5,5,5),
