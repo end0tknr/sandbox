@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <!-- refer to https://ozateck.sakura.ne.jp/wordpress/ -->
+  <title>Hello Three.js</title>
+  <style>
+    body{
+	margin: 0;
+	overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <h1>マイクからの入力音声を波形として表示</h1>
+  <div id="stage"></div>
+  <audio muted></audio>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/97/three.min.js"></script>
+  <!-- 処理速度やフレームレートを確認する為 -->
+  <script src="https://cdn.jsdelivr.net/npm/stats-js@1.0.1/build/stats.min.js"></script>
+  <!-- マウスによるカメラ操作 -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/three@0.105.2/examples/js/controls/TrackballControls.js">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+  
+  <script src="js/app_audio_2.js"></script>
+</body>
+</html>
