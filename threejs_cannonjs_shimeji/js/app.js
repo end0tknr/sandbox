@@ -77,7 +77,25 @@ for(var x=0; x<10; x++){
     }
 }
 var points = new THREE.Points(geometry, material);
+points.name = "myParticle";
 scene.add(points);
+
+
+// Particles を削除
+function removeParticle(){
+    console.log("children:" + scene.children.length);
+ 
+    var total = scene.children.length;
+    for(var i=0; i<total; i++){
+	var obj = scene.children[i];
+	if(obj.name == "myParticle"){
+	    scene.remove(obj);
+	    return;
+	}
+    }
+}
+
+setInterval(removeParticle, 1000);
 
 
 // Cube
@@ -109,7 +127,7 @@ txLoader.load(
 	moon.position.set(50, 50, 50);
 	//	moon.position.set(100, 50, 0);
 	scene.add(moon);
-});
+    });
 
 // Renderer - 毎フレーム描画
 var renderer = new THREE.WebGLRenderer({antialias: true});
