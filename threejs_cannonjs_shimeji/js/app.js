@@ -50,35 +50,38 @@ document.getElementById("stage").appendChild(renderer.domElement);
 //==========
 // Web Audio
 navigator.getUserMedia = 
-	navigator.getUserMedia || navigator.webkitGetUserMedia || 
-	navigator.mozGetUserMedia || navigator.msGetUserMedia;
+    navigator.getUserMedia || navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
 navigator.getUserMedia({audio : true}, onSuccess, onError);
 
 function onSuccess(stream){
-	console.log("onSuccess");
+    console.log("onSuccess");
 
-	document.querySelector("audio").src = URL.createObjectURL(stream);
-	var audioContext = new AudioContext();
-	var analyser     = audioContext.createAnalyser();
-	var timeDomain   = new Float32Array(analyser.frequencyBinCount);
-	var frequency    = new Uint8Array(analyser.frequencyBinCount);
-	audioContext.createMediaStreamSource(stream).connect(analyser);
+    // document.querySelector("audio").src = URL.createObjectURL(stream);
+    document.querySelector("audio").src =
+	window.URL.createObjectURL(new Blob([stream], {type: "application/zip"}))
+    
+    var audioContext = new AudioContext();
+    var analyser     = audioContext.createAnalyser();
+    var timeDomain   = new Float32Array(analyser.frequencyBinCount);
+    var frequency    = new Uint8Array(analyser.frequencyBinCount);
+    audioContext.createMediaStreamSource(stream).connect(analyser);
 
-	console.log("frequency:" + frequency.length);
+    console.log("frequency:" + frequency.length);
 
-	loop();
-	function loop(){
-		analyser.getFloatTimeDomainData(timeDomain);
-		analyser.getByteFrequencyData(frequency);
-		// update
-		updateThree(timeDomain, frequency);
-		window.requestAnimationFrame(loop);
-	}
+    loop();
+    function loop(){
+	analyser.getFloatTimeDomainData(timeDomain);
+	analyser.getByteFrequencyData(frequency);
+	// update
+	updateThree(timeDomain, frequency);
+	window.requestAnimationFrame(loop);
+    }
 }
 
 function onError(e){
-	console.log("onError:" + e);
+    console.log("onError:" + e);
 }
 
 // Points
@@ -87,44 +90,44 @@ var points;
 // Draw
 function updateThree(timeDomain, frequency){
 
-	// Stats
-	stats.update();
+    // Stats
+    stats.update();
 
-	// Remove Points
-	if(points != null) scene.remove(points);
+    // Remove Points
+    if(points != null) scene.remove(points);
+    
+    // Particles
+    var geom = new THREE.Geometry();
+    var material = new THREE.PointsMaterial({
+	color: 0xffffff, size: 2, vertexColors: true, transparent: true, opacity: 1.0
+    });
 
-	// Particles
-	var geom = new THREE.Geometry();
-	var material = new THREE.PointsMaterial({
-		color: 0xffffff, size: 2, vertexColors: true, transparent: true, opacity: 1.0
-	});
+    var paddingX = 2;  // パーティクルの間隔
+    var offset   = 4;  // 1024を4分割
+    var total    = Math.floor(frequency.length / offset);
 
-	var paddingX = 2;  // パーティクルの間隔
-	var offset   = 4;  // 1024を4分割
-	var total    = Math.floor(frequency.length / offset);
+    var minX     = total * paddingX / -2;  // 開始位置x
+    var maxY     = 100;// 最大の高さy
 
-	var minX     = total * paddingX / -2;  // 開始位置x
-	var maxY     = 100;// 最大の高さy
+    console.log(total);
 
-	console.log(total);
+    for(var i=0; i<total; i++){
 
-	for(var i=0; i<total; i++){
-
-		var particle = new THREE.Vector3(
-			minX + i * paddingX,
-			Math.max(0, frequency[i*offset] * maxY / 255), 0);
-		geom.vertices.push(particle);
-
-		var color = new THREE.Color(0x00ff00);
-		color.setHSL(color.getHSL().h, color.getHSL().s, color.getHSL().l);
-		geom.colors.push(color);
-	}
-
-	// Add Points
-	points = new THREE.Points(geom, material);
-	scene.add(points);
-
-	// Render
-	renderer.render(scene, camera);
+	var particle = new THREE.Vector3(
+	    minX + i * paddingX,
+	    Math.max(0, frequency[i*offset] * maxY / 255), 0);
+	geom.vertices.push(particle);
+	
+	var color = new THREE.Color(0x00ff00);
+	color.setHSL(color.getHSL().h, color.getHSL().s, color.getHSL().l);
+	geom.colors.push(color);
+    }
+    
+    // Add Points
+    points = new THREE.Points(geom, material);
+    scene.add(points);
+    
+    // Render
+    renderer.render(scene, camera);
 }
 
