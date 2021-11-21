@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>CSS Grid</title>
+  <style>
+    body {	margin: 20px; }
+    
+    .box1 {	background: hsl(0, 60%, 60%);	}
+    .box2 {	background: hsl(60, 60%, 60%);	}
+    .box3 {	background: hsl(120, 60%, 60%); }
+    .box4 {	background: hsl(180, 60%, 60%); }
+    .box5 {	background: hsl(240, 60%, 60%); }
+
+    .container_1 {
+	display: grid;
+	grid-template-columns: repeat(3, 100px);
+	grid-template-rows:    repeat(4, 100px);
+
+	grid-auto-flow: column dense;
+	grid-auto-columns: 100px;
+    }
+
+    .container_2 {
+	display: grid;
+	grid-template-columns: repeat(3, 100px);
+	grid-template-rows:    repeat(4, 100px);
+
+	grid-auto-flow: row;
+	grid-auto-columns: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h1>要素の並び順を縦/横に変更 - grid-auto-flow: column dense;</h1>
+  <div class="container_1">
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+  </div>
+
+  <h1></h1>
+  <div class="container_2">
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+  </div>
+
+</body>
+</html>

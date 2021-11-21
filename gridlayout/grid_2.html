@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>CSS Grid</title>
+  <style>
+    body {	margin: 20px; }
+    
+    .box1 {	background: hsl(0, 60%, 60%);	}
+    .box2 {	background: hsl(60, 60%, 60%);	}
+    .box3 {	background: hsl(120, 60%, 60%); }
+    .box4 {	background: hsl(180, 60%, 60%); }
+    .box5 {	background: hsl(240, 60%, 60%); }
+
+    .container_1 {
+	display: grid;
+	grid-template-columns: repeat(4, 100px);
+	grid-template-rows: 100px 100px;
+    }
+    .container_2 {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 100px);
+	grid-template-rows: 100px 100px;
+    }
+
+    .container_3 {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+	grid-template-rows: 100px 100px;
+    }
+
+    .container_4 {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+	grid-template-rows: 100px 100px;
+    }
+
+    .container_5 {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+	grid-auto-rows: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h1>「grid-template-columns: repeat(4, 100px);」を使用</h1>
+  <div class="container_1">
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+  </div>
+
+  <h1>window幅に応じ、grid数を可変</h1>
+
+  <div class="container_2">
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+  </div>
+  
+  <h1>window幅に応じ、grid幅を可変 1. repeat(auto-fill, minmax(100px, 1fr))</h1>
+
+  <div class="container_3">
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+  </div>
+
+  <h1>window幅に応じ、grid幅を可変 2. repeat(auto-fit, minmax(100px, 1fr))</h1>
+
+  <div class="container_4">
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+  </div>
+
+  <h1>window幅に応じ、grid行数を可変.  grid-auto-rows: 100px;</h1>
+
+  <div class="container_5">
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+    <div class="box1">1</div>
+    <div class="box2">2</div>
+    <div class="box3">3</div>
+    <div class="box4">4</div>
+    <div class="box5">5</div>
+  </div>
+  
+</body>
+</html>
