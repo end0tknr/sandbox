@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>SVG (Scalable Vector Graphics)</title>
+</head>
+<body>
+  
+  <svg width="60" height="60">
+      <defs>
+	<style>
+          @keyframes text-move {
+              0% {
+		  stroke-dashoffset: 300; /* SVG pathが始まる場所 */
+		  stroke: #ff4500;
+		  fill:   none;
+              }
+              100% {
+		  stroke-dashoffset: 0;   /* SVG pathが始まる場所 */
+		  stroke: #FBBC05;
+		  fill:   #FBBC05;
+              }
+          }
+          .logo_text {
+              font-size:   42px;
+              font-weight: bold;
+              font-family: "Times New Roman";
+	      font-style : italic;
+              stroke: #fff;
+              fill:   #fff;
+              animation: text-move 2s ease-out;
+              stroke-dasharray: 300; /* 破線の間隔 */
+              text-anchor: middle;   /* textの中心で座標指定 */
+          }
+	</style>
+      </defs>
+
+    <circle cx="30" cy="30" r="30" fill="#20285A"/>
+    <text x="29" y="44" class="logo_text"> J </text>
+    
+  </svg>
+  
+</body>
+</html>
