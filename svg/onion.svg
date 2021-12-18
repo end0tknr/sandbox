@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400">
+  <defs>
+    <style>
+      ellipse, polyline {
+        stroke         : #20285A;
+        stroke-width   : 4;
+	stroke-linecap : round;
+        fill           : none;
+      }
+      text {
+        font-size   : 20px;
+        font-weight : normal;
+        stroke: #20285A;
+        fill:   #20285A;
+        text-anchor: middle;   /* textの中心で座標指定 */
+      }
+    </style>
+  </defs>
+  
+  <ellipse cx="300" cy="200" rx="220" ry="140" />
+  <ellipse cx="300" cy="220" rx="200" ry="120" />
+  <ellipse cx="300" cy="240" rx="180" ry="100" />
+  <ellipse cx="300" cy="260" rx="160" ry="80" />
+  <ellipse cx="300" cy="280" rx="140" ry="60" />
+  <ellipse cx="300" cy="300" rx="120" ry="40" />
+  <text x="300" y="90">社会・環境</text>
+  <text x="300" y="130">顧客</text>
+  <text x="300" y="170">企業・ビジネス</text>
+  <text x="300" y="210">業務</text>
+  <text x="300" y="250">システム</text>
+  <text x="300" y="290">ソフトウエア</text>
+
+  <polyline points="130,100 230,290 235,275" />
+  <polyline points="370,290 470,100 452,108" />
+  <text x="130" y="90">要求</text>
+  <text x="470" y="90">サービス</text>
+</svg>
