@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450">
+  <defs>
+    <style>
+      line, polyline, path {
+      stroke         : #20285A;
+      stroke-width   : 2;
+      stroke-linecap : round;
+      fill           : none;
+      }
+      path {
+      stroke-width   : 4;
+      }
+      .professional {
+      stroke         : #FF0000;
+        text-anchor: start;
+      }
+      .amature {
+        stroke       : #0000FF;
+        text-anchor: start;
+      }
+      
+      .dash {
+        stroke-dasharray : 8 8;
+      }
+
+
+      text {
+        font-size   : 20px;
+        font-weight : normal;
+        stroke: #20285A;
+        fill:   #20285A;
+        text-anchor: middle;   /* textの中心で座標指定 */
+      }
+      text.note {
+        text-anchor: start;
+        font-size   : 18px;
+        stroke: #666;
+        fill:   #666;
+      }
+      text.vertical {
+        writing-mode : tb;
+      }
+    </style>
+  </defs>
+  
+  <polyline points="100,400 100,50 90,60" />
+  <polyline points="100,400 600,400 590,410" />
+  <text x="70"  y="300" class="vertical">品質</text> /* 縦書き */
+  <text x="300" y="440">時間</text>
+
+  <polyline points="450,400 450,50" class="dash" />
+  <polyline points="550,400 550,50" class="dash" />
+  <text x="450" y="420">70%</text>
+  <text x="550" y="420">100%</text>
+  <text x="550" y="440">(納期)</text>
+
+  <polyline points="100,100 600,100" class="dash" />
+  <polyline points="100,180 600,180" class="dash" />
+  <text x="65" y="105">100%</text>
+  <text x="65" y="185">70%</text>
+
+  <path d="M 100,400 Q 450,400 550,140" class="amature"/>
+  <path d="M 100,400 Q 110,50 550,70"   class="professional"/>
+  <text x="165" y="210" class="professional">プロ</text>
+  <text x="165" y="230" class="note">不確実性の高い部分から取り組み、</text>
+  <text x="165" y="250" class="note">短時間で全体像や一定品質を作成し</text>
+  <text x="165" y="270" class="note">残り時間で細かい部分を作りこむ</text>
+
+  <text x="165" y="310" class="amature">アマ</text>
+  <text x="165" y="330" class="note">重要部分が後回しにされ</text>
+  <text x="165" y="350" class="note">終盤での問題発生時に</text>
+  <text x="165" y="370" class="note">リカバリー難</text>
+
+</svg>
