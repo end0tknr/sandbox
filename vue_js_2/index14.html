@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>My Vue App</title>
+  <link rel="stylesheet" href="css/styles14.css">
+</head>
+<body>
+  <h1>refer from dot install</h1>
+
+  <div id="app">
+    <p>Total Likes: {{ total }}</p>
+    
+    <like-component message="Like" @increment="incrementTotal"></like-component>
+    <like-component message="Awesome" @increment="incrementTotal"></like-component>
+    <like-component message="Great" @increment="incrementTotal"></like-component>
+    <like-component @increment="incrementTotal"></like-component>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+  <script src="js/main14.js"></script>
+</body>
+</html>
