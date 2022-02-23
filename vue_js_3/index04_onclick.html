@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>end0tknr's vue.js sample</title>
+</head>
+<body>
+  <h1>Vue.js</h1>
+
+  <div id="app">
+    {{ message }}
+    <hr/>
+    <button v-on:click="stopTimer()">stop timeer</button>
+  </div>
+  
+  <script src="https://unpkg.com/vue@next"></script>
+  <script>
+    const appdata = {
+        data(){
+            return {
+                message: "",
+                timer: null
+            }
+        },
+
+        created(){
+            this.message = "Hello World !!";
+            this.count   = 0;
+        },
+
+        mounted(){
+            this.timer = setInterval(()=>{
+                this.count++;
+                this.message = 'Count: ' + this.count
+            }, 1000)
+        },
+
+        methods: {
+            stopTimer(){
+                clearInterval(this.timer);
+                
+            }
+        }
+    }
+
+    Vue.createApp(appdata).mount('#app');
+  </script>
+</body>
+</html>

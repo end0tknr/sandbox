@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>demo for vue.js 3 + axios</title>
+</head>
+
+<body>
+  <div id="app">
+    <h1>{{ message }}</h1>
+
+    refer from https://reffect.co.jp/vue/vue-axios-learn
+  </div>
+  
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  
+  <script>
+    axios.defaults.baseURL = 'https://jsonplaceholder.typicode.com';
+    
+    axios.interceptors.request.use((config) => {
+        // config.baseURL = 'https://example.com';
+        // console.log(config)
+        // return config;
+    });
+    axios.interceptors.response.use((response) => {
+        // console.log(response);
+        // return response;
+    });
+    
+    const app = Vue.createApp({
+        data(){
+            return { message: 'Demo Vue.js 3 + Axios', }
+        },
+        mounted(){
+            //axios.defaults.headers.common['appId'] = `hoge_hoge_id`;
+            
+            //axios.get('https://jsonplaceholder.typicode.com/usershoge')
+            axios.get('/users')
+                .then((response)=>{
+                    console.log("status:"    +response.status)
+                    
+                    for(let atri_key in response.headers) {
+                        console.log("header:"+
+                                    atri_key+"="+response.headers[atri_key])
+                    }
+                    
+                    for(let conf_key in response.config) {
+                        console.log("config:"+
+                                    conf_key+"="+response.config[conf_key])
+                    }
+
+                    console.log(response.data)
+                    
+                    for(let data_no in response.data) {
+                        let data = response.data[data_no]
+                        
+                        for(let data_key in data) {
+                            console.log("data:"+
+                                        data_key+"="+data[data_key])
+                        }
+                    }
+                })
+                .catch((error)=>{
+                    console.log(error)
+                    console.log(JSON.stringify(error))
+                    console.log(error.name)
+                    console.log(error.message)
+                    console.log(error.request)
+                    console.log(error.response)
+                })
+                .finally(function(){
+                })
+        }
+    })
+
+    app.mount('#app')
+  </script>
+</body>
+</html>

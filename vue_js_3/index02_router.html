@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="https://unpkg.com/vue-router@next"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>{{ title }}</h1>
+
+    <nav>
+      <router-link to="/">ホーム</router-link>
+      <router-link to="/news">ニュース</router-link>
+      <router-link to="/about">About</router-link>
+    </nav>
+
+    refer from https://reffect.co.jp/vue/first-time-vue-router
+    
+    <router-view/>
+    
+  </div>
+  
+  <script>
+    const Home = { template: '<div>初めてのVue Resource</div>'}
+    const News = { template: '<div>今週のニュースは....</div>'}
+    const About = { template: '<div>会社までのアクセス方法は....</div>'}
+
+    const router =  VueRouter.createRouter({
+	history: VueRouter.createWebHistory(),
+	routes : [
+	    {path:'/', component : Home},
+	    {path:'/news',component: News},
+	    {path:'/about',component: About}
+	],
+    })
+    
+    
+    const app = Vue.createApp({
+        data(){
+            return {
+		title: "Vue Resource"
+	    }
+        }
+    })
+    app.use(router)
+
+    app.mount('#app')
+  </script>
+</body>
+</html>

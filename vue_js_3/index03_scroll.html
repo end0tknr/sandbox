@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+  <div id="app">
+    <h1>無限スクロール</h1>
+
+    refer from https://reffect.co.jp/vue/vue-js-infinite-scroll-intersection-observer-api
+    
+    <div v-for="post in posts" :key="post.id">
+      <h2>{{post.id}}:{{ post.title }}</h2>
+      <p>{{ post.body }}</p>
+    </div>
+    
+    <div ref="observe_element">監視対象の要素</div>
+  </div>
+  <script>
+    const post_api = 'https://jsonplaceholder.typicode.com/posts';
+    
+    const app = Vue.createApp({
+        data(){
+            return {
+		observer: null,
+		posts   : [],
+		page    : 1,
+	    }
+        },
+        mounted() {
+	    // 対象要素がブラウザの表示画面に入ってきたことを
+	    // Intersection Observer APIで監視
+	    this.observer = new IntersectionObserver((entries)=>{
+		const entry = entries[0]
+		if (entry && entry.isIntersecting) {
+		    this.get_posts()
+		}
+	    })
+	    
+	    const observe_element = this.$refs.observe_element;
+            this.observer.observe(observe_element);
+        },
+	methods: {
+	    async get_posts() {
+		const res = await
+		fetch(post_api +`?_page=${this.page++}`)
+		const posts = await res.json()
+		this.posts = [...this.posts, ...posts]
+	    }
+	},
+    });
+
+    app.mount('#app')
+  </script>
+</body>
+</html>
+
