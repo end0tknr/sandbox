@@ -1,0 +1,537 @@
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <!--DHX GANTT ver.7.1.12 -->
+  <script src="dhtmlxgantt.min.js"></script>
+  <link rel="stylesheet" href="dhtmlxgantt.min.css">
+  <!-- excelやpdfへ exportする為に使用 -->
+  <script src="https://export.dhtmlx.com/gantt/api.js?v=7.1.12"></script>
+
+  <script src="dhtmlxgantt_data.js"></script>
+  
+  <!-- select boxのカスタマイズの為、chosen for jqueryを使用 -->
+  <!-- https://docs.dhtmlx.com/gantt/samples/05_lightbox/14_jquery_multiselect.html -->
+  <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
+  <link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css">
+  
+  <style>
+    html, body {	height: 100%;
+			padding: 0px;
+			margin:  0px;
+			overflow: hidden; }
+    #gantt_here {	width:  100%;
+			height: 800px;
+			height: calc(100vh - 52px);	}
+    .gantt_scale_cell,
+    .gantt_grid div,
+    .gantt_data_area div {font-size: 16px;		}
+    .gantt_task_content{color: #6e6e6e;		}
+
+    .gantt_task_line {	background-color: #C7D8F7;
+			border: 1px solid #9AB9F1;	}
+    .gantt_task_line .gantt_task_progress {
+			background-color: #9AB9F1;	}
+
+    .gantt_task_line.gantt_dependent_task {
+			background-color: #E1FFD4;
+			border: 1px solid #A7D991;	}
+    .gantt_task_line.gantt_dependent_task .gantt_task_progress {
+	background-color: #A7D991;
+    }
+    
+    .weekend {		background: #fff0f5; }
+
+    .gantt_cal_chosen,
+    .gantt_cal_chosen select{	width: 400px; }
+
+    /* 編集modalのヘッダ部でのドラッグを有効にしたまま、文字の非表示化 */
+    div.gantt_cal_ltitle { height: 20px;}
+    div.gantt_cal_ltitle span { display:none;}
+  </style>
+</head>
+<body>
+  <div class="gantt_control" >
+    <button type="button" onclick="showGroups()"       >ツリー VIEW</button>
+    <button type="button" onclick="showGroups('owner')">担当毎 VIEW</button>
+
+    <button type="button" onclick="gantt.ext.zoom.zoomIn()" >Zoom ＋</button>
+    <button type="button" onclick="gantt.ext.zoom.zoomOut()">Zoom ー</button>
+
+    <button type="button" onclick='gantt.undo()'>Undo</button>
+    <button type="button" onclick='gantt.redo()'>Redo</button>
+
+    <button type="button" onclick='batch_delete()'>選択行の削除</button>
+
+    <button type="button"
+	    onclick="gantt.exportToExcel({name:'PROJ_GANTT.XLSX',date_format:'yyyy/mm/dd'})">
+      Export Excel</button>
+    <button type="button"
+	    onclick="gantt.exportToPDF({name:'PROJ_GANTT.PDF'})">
+      Export Pdf</button>
+  </div>
+  
+  <div id="gantt_here"></div>
+  
+  <script>
+    
+    var zoomConfig = {
+	levels: [
+	    {name:"day",
+	     scale_height: 50,
+	     min_column_width:50,
+	     scales:[{unit: "month", format: "%Y / %n"},
+		     {unit: "day",   format: "%j %D"}]	},
+	    {name:"month",
+	     scale_height: 50,
+	     min_column_width:120,
+	     scales:[{unit: "month",format: "%Y / %n"},
+		     {unit: "week", format: "週"}]	},
+	    {name:"year",
+	     scale_height: 50,
+	     min_column_width: 30,
+	     scales:[{unit: "year", format: "%Y"},
+		     {unit: "month",format: "%n"}]	}
+	]
+    };
+    gantt.ext.zoom.init(zoomConfig);
+    gantt.ext.zoom.setLevel("day");
+    
+    // 週末の表示色を変更
+    gantt.templates.timeline_cell_class = function (item, date) {
+	if (date.getDay() == 0 || date.getDay() == 6) {
+	    return "weekend"
+	}
+    };
+
+    gantt.plugins({
+	//quick_info     :true,
+	grouping       :true,
+	auto_scheduling:true,
+	undo           :true,
+	multiselect    :true
+    });
+
+    //選択行の一括削除
+    var batch_delete = function(){
+	gantt.batchUpdate(function () {
+	    gantt.eachSelectedTask(function(task_id){
+		if( gantt.isTaskExists(task_id) ) gantt.deleteTask(task_id);
+	    });
+	});
+    }
+    
+    gantt.serverList("owner", [
+	{ key: 1, label: "Ilona" },
+	{ key: 2, label: "John" },
+	{ key: 3, label: "Mike" },
+	{ key: 4, label: "Anna" },
+	{ key: 5, label: "Bill" },
+	{ key: 6, label: "Floe" }
+    ]);
+
+    // defaultでは、type=milestoneもありますが、
+    // end_dateがstart_dateよりも前になる為、milestoneは使用しません
+    gantt.config.types = {'task':'task','project':'project'};
+    // 期間≒0のtaskを作成すると、end_dateがstart_dateよりも前になる為
+    gantt.config.min_duration = 24*60*60*1000; // 1 day
+    //gantt.config.date_format = "%Y-%m-%d %H:%i";
+    gantt.config.auto_scheduling = true;
+    gantt.config.auto_scheduling_strict = true;
+    // 画面左側の表部の幅を調整可能にします
+    gantt.config.grid_resize = true;
+    gantt.config.grid_width = 550;
+    gantt.config.keep_grid_width = false;
+    gantt.config.open_tree_initially = true;
+    gantt.config.order_branch = true;
+    gantt.config.row_height = 30;
+    //gantt.config.correct_work_time = false;
+    
+    function byId(list, id) {
+	for (var i = 0; i < list.length; i++) {
+	    if (list[i].key == id)
+		return list[i].label || "";
+	}
+	return "";
+    }
+
+    gantt.config.date_grid = "%n/%d %D";
+
+    gantt.config.min_grid_column_width = 2;
+
+    gantt.config.columns = [
+	{name: "wbs",   label: "No",width:40,template:gantt.getWBSCode,resize:true},
+	{name: "text",  label: "名称", tree: true, width: '*', resize: true},
+	{name: "owners", width: 70, label:"担当", align: "center", resize: true, template: function (task) {
+	    var result = "";
+	    var owners = task.owner
+	    
+	    if (!owners)
+		return;
+	    if (owners.length == 1) {
+		return byId(gantt.serverList('owner'), owners);
+	    }
+	    owners.forEach(function (element) {
+		var owner = byId(gantt.serverList('owner'), element);
+		result += " "+owner;
+	    });
+	    return result;
+	}, resize: true	},
+	{name: "start_date",width: 70, label: "開始", resize: true},
+	{name: "end_date",  width: 70, label: "終了", resize: true},
+	{name: "duration",  width: 40, label: "日数", resize: true,
+	 template: function(task){
+	     if(task.type != gantt.config.types.project){
+		 return +task.duration;
+	     }
+	     return Math.floor((task.end_date - task.start_date)/ 86400000);
+	     //res = gantt.getSubtaskDuration(task.id);
+	 }},
+	{name: "progress",width: 40, label: "進捗", resize: true,
+	 template: function (item) {
+	     if (item.progress >= 1)	return "済";
+	     if (item.progress == 0)	return "";
+	     return Math.round(item.progress * 100) + "%";
+	 }
+	},
+	{name: "add",     width: 40}
+    ];
+    // https://docs.dhtmlx.com/gantt/api__gantt_task_end_date_template.html
+    gantt.templates.task_end_date = function(date){
+     	return gantt.templates.task_date(new Date(date.valueOf() - 1)); 
+    };
+    var gridDateToStr = gantt.date.date_to_str("%n/%d %D");
+    gantt.templates.grid_date_format = function(date, column){
+    	if(column === "end_date"){
+    	    return gridDateToStr(new Date(date.valueOf() - 1)); 
+    	}else{
+    	    return gridDateToStr(date); 
+    	}
+    }
+    
+    var duration = function (a, b, c) {
+	let date_a = new Date(a.value);
+	let date_b = new Date(b.value+" 23:59:59");
+	var res = gantt.calculateDuration(date_a,date_b);
+	c.innerHTML = res + ' 日間';
+    };
+
+
+    gantt.form_blocks["multiselect"] = {
+	render: function (sns) {
+	    var height = (sns.height || "23") + "px";
+	    var html = "<div class='gantt_cal_ltext gantt_cal_chosen gantt_cal_multiselect' style='height:" + height + ";'><select data-placeholder='...' class='chosen-select' multiple>";
+	    if (sns.options) {
+		for (var i = 0; i < sns.options.length; i++) {
+		    if(sns.unassigned_value !== undefined && sns.options[i].key == sns.unassigned_value){
+			continue;
+		    }
+		    html += "<option value='" + sns.options[i].key + "'>" + sns.options[i].label + "</option>";
+		}
+	    }
+	    html += "</select></div>";
+	    return html;
+	},
+	
+	set_value: function (node, value, ev, sns) {
+	    node.style.overflow = "visible";
+	    node.parentNode.style.overflow = "visible";
+	    node.style.display = "inline-block";
+	    var select = $(node.firstChild);
+	    
+	    if (value) {
+		value = (value + "").split(",");
+		select.val(value);
+	    }
+	    else {
+		select.val([]);
+	    }
+	    
+	    select.chosen();
+	    if(sns.onchange){
+		select.change(function(){
+		    sns.onchange.call(this);
+		})
+	    }
+	    select.trigger('chosen:updated');
+	    select.trigger("change");
+	},
+	
+	get_value: function (node, ev) {
+	    var value = $(node.firstChild).val();
+	    return value;
+	},
+	focus: function (node) {
+	    $(node.firstChild).focus();
+	}
+    };
+
+    gantt.form_blocks["dhx_calendar"] = {
+	render: function(sns){
+	    return [
+		"<div class='dhx_calendar_cont'>",
+		" <input type='date' id='calendar1'/> ～ ",
+		" <input type='date' id='calendar2'/>",
+		" <label id='duration'></label>",
+		"</div>" ].join("");
+	},
+	set_value: function (node, value, task, data) {
+	    var a = node._cal_start = document.getElementById('calendar1');
+	    var b = node._cal_end   = document.getElementById('calendar2');
+	    var c = node.lastChild;
+
+	    const to_date_str = function(date){
+		const pad = function (str) {
+		    return ('0' + str).slice(-2);
+		};
+		const year = (date.getFullYear()).toString();
+		const month = pad((date.getMonth() + 1).toString());
+		const day = pad(date.getDate().toString());
+		return `${year}-${month}-${day}`;
+	    }
+	    a.value = to_date_str(task.start_date);
+	    b.value = to_date_str(new Date(task.end_date.valueOf() -1));
+	    duration(a, b, c);
+
+	    const calc_duration = {
+		a:a,
+		b:b,
+		c:c,
+		handleEvent: function(){ duration(a,b,c) }
+	    }
+	    
+	    a.addEventListener('change',calc_duration,false);
+	    b.addEventListener('change',calc_duration,false);
+
+	    var id = gantt.attachEvent("onAfterLightbox", function(){
+		a.removeEventListener('change',calc_duration,false);
+		b.removeEventListener('change',calc_duration,false);
+		a = b = null;
+		this.detachEvent(id);
+	    });
+	},
+	get_value: function (node, task) {
+	    task.start_date = new Date(node._cal_start.value+" 00:00");
+	    task.end_date   = new Date(node._cal_end.value+" 23:59");
+	    return task;
+	},
+	focus: function (node) {}
+    };
+    gantt.form_blocks["dhx_slider"] = {
+	render: function (sns) {
+	    return [
+		'<div class="gantt_slider">',
+		' <input type="range" id="range1" min="0" max="100" step="10"/>',
+		' <label id="label_range1"></label>',
+		'</div>' ].join("");
+	},
+	set_value: function(node, value, task, data){
+	    node._slider = document.getElementById('range1');
+	    node._count  = document.getElementById('label_range1');
+	    
+	    const calc_progress = {
+		handleEvent: function(){
+		    node._count.innerHTML = node._slider.value + "%";
+		}
+	    }
+
+	    node._slider.addEventListener('change',calc_progress,false);
+	    
+	    var id = gantt.attachEvent("onAfterLightbox", function(){
+		node._slider.removeEventListener('change',calc_progress,false);
+		node._slider = null;
+		this.detachEvent(id);
+	    });
+	    
+	    if (task.progress || task.progress == 0) {
+		node._slider.value    = parseInt(task.progress * 100);
+		node._count.innerHTML = node._slider.value + "%";
+	    }
+	},
+	get_value: function (node, task) {
+	    return node._slider ? node._slider.value / 100 : 0;
+	},
+	focus: function (node) {
+	}
+    };
+    
+    gantt.config.wide_form = true;
+    gantt.config.show_tasks_outside_timescale = false;
+
+    // https://docs.dhtmlx.com/gantt/desktop__task_types.html
+    gantt.config.lightbox.project_sections= [
+	{name: "type", type: "typeselect", map_to:"type"},
+	{name:"parent", type:"parent", allow_root:false,
+	 filter:function(id,task){return task.type=="project"?true:false;}},
+	{name:"description",type:"textarea",    map_to:"text",   height:38},
+	{name:"details",    type:"textarea",    map_to:"details",height:60},
+	{name:"owner",height:60, type:"multiselect",
+	 options:gantt.serverList("owner"), map_to:"owner"},
+    ];
+    gantt.config.lightbox.milestone_sections= [
+	{name:"parent", type:"parent", allow_root:false,
+	 filter:function(id,task){return task.type=="project"?true:false;}},
+	{name:"description",type:"textarea",    map_to:"text",   height:38},
+	{name:"details",    type:"textarea",    map_to:"details",height:60},
+	//{name: "type", type: "typeselect", map_to: "type"},
+	{name: "time", type: "duration", single_date: true, map_to: "auto"}
+    ];
+    gantt.config.lightbox.sections = [
+	{name: "type", type: "typeselect", map_to: "type"},
+	{name:"parent", type:"parent", allow_root:false,
+	 filter:function(id,task){return task.type=="project"?true:false;}},
+	{name:"description", height:38, map_to:"text",   type:"textarea"},
+	{name:"details",     height:60, map_to:"details",type:"textarea"},
+	{name:"owner",height:60, type:"multiselect",
+	 options:gantt.serverList("owner"), map_to:"owner"},
+	
+	{name:"time",    type:"dhx_calendar",map_to:"auto",  },
+	{name:"progress",type:"dhx_slider",  map_to:"progress"},
+    ];
+    
+    gantt.i18n.setLocale("jp");
+    // locale対象のkey確認は、dhtmlxgantt.js のソース終盤を見る方が早そう
+    gantt.locale.labels = Object.assign(
+	gantt.locale.labels,
+	{section_type         :"タイプ",
+	 section_parent       :"親作業",
+	 section_description  :"名称",
+	 section_details      :"詳細",
+	 section_progress     :"進捗",
+	 section_owner        :"担当",
+	 new_task             :"作業名称",
+	 confirm_deleting     :"完全に削除されますが、よろしいですか?",
+	 link                 :"リンク",
+	 confirm_link_deleting:"を削除しますか?"});
+    
+    // タスクの幅が狭い場合、タスク名称をバーの右側に表示
+    // https://docs.dhtmlx.com/gantt/samples/08_api/12_fit_task_text.html
+    (function () {
+	gantt.config.font_width_ratio = 7;
+	gantt.templates.leftside_text =
+	    function leftSideTextTemplate(start, end, task) {
+		if(getTaskFitValue(task)==="left") { return task.text; }
+		return ""; };
+	gantt.templates.rightside_text =
+	    function rightSideTextTemplate(start, end, task) {
+		if(getTaskFitValue(task)==="right"){ return task.text; }
+		return ""; };
+	gantt.templates.task_text =
+	    function taskTextTemplate(start, end, task) {
+		if(getTaskFitValue(task)==="center"){ return task.text; }
+		return "";
+	    };
+	
+	function getTaskFitValue(task) {
+	    var taskStartPos = gantt.posFromDate(task.start_date);
+	    var taskEndPos   = gantt.posFromDate(task.end_date);
+	    
+	    var width = taskEndPos - taskStartPos;
+	    var textWidth =
+		(task.text || "").length * gantt.config.font_width_ratio;
+	    
+	    if (width < textWidth) {
+		var ganttLastDate = gantt.getState().max_date;
+		var ganttEndPos   = gantt.posFromDate(ganttLastDate);
+		if (ganttEndPos - taskEndPos < textWidth) { return "left" }
+		return "right"
+	    }
+	    return "center";
+	}
+    })();
+
+    // type=projectの場合、進捗率を配下のtaskから集計
+    // https://docs.dhtmlx.com/gantt/samples/08_api/16_dynamic_progress.html
+    (function dynamicProgress() {
+	function calculateSummaryProgress(task) {
+	    if (task.type != gantt.config.types.project)
+		return task.progress;
+	    var totalToDo = 0;
+	    var totalDone = 0;
+	    gantt.eachTask(function (child) {
+		if (child.type != gantt.config.types.project) {
+		    totalToDo += child.duration;
+		    totalDone += (child.progress || 0) * child.duration;
+		}
+	    }, task.id);
+	    if (!totalToDo) return 0;
+	    else return totalDone / totalToDo;
+	}
+	
+	function refreshSummaryProgress(id, submit) {
+	    if (!gantt.isTaskExists(id))
+		return;
+	    
+	    var task = gantt.getTask(id);
+	    var newProgress = calculateSummaryProgress(task);
+	    
+	    if (newProgress !== task.progress) {
+		task.progress = newProgress;
+		
+		if (!submit) {
+		    gantt.refreshTask(id);
+		} else {
+		    gantt.updateTask(id);
+		}
+	    }
+	    
+	    if (!submit && gantt.getParent(id) !== gantt.config.root_id) {
+		refreshSummaryProgress(gantt.getParent(id), submit);
+	    }
+	}
+	
+	gantt.attachEvent("onParse", function () {
+	    gantt.eachTask(function (task) {
+		task.progress = calculateSummaryProgress(task);
+	    });
+	});
+	
+	gantt.attachEvent("onAfterTaskUpdate", function (id) {
+	    refreshSummaryProgress(gantt.getParent(id), true);
+	});
+	
+	gantt.attachEvent("onTaskDrag", function (id) {
+	    refreshSummaryProgress(gantt.getParent(id), false);
+	});
+	gantt.attachEvent("onAfterTaskAdd", function (id) {
+	    refreshSummaryProgress(gantt.getParent(id), true);
+	});
+	
+	(function () {
+	    var idParentBeforeDeleteTask = 0;
+	    gantt.attachEvent("onBeforeTaskDelete", function (id) {
+		idParentBeforeDeleteTask = gantt.getParent(id);
+	    });
+	    gantt.attachEvent("onAfterTaskDelete", function () {
+		refreshSummaryProgress(idParentBeforeDeleteTask, true);
+	    });
+	})();
+    })();
+    gantt.templates.task_class = function (start, end, task) {
+	if (task.type == gantt.config.types.project)
+	    return "hide_project_progress_drag";
+    };
+
+    // GANTTチャートの初期化と、データの表示
+    gantt.init("gantt_here");
+    gantt.parse(taskData);
+
+    function showGroups(type) {
+	if (type =='owner') {
+	    gantt.$groupMode = true;
+
+	    gantt.groupBy({
+		groups: gantt.serverList(type),
+		relation_property: type,
+		group_id: "key",
+		group_text: "label",
+		default_group_label: "Unassigned"
+	    });
+	    return;
+	}
+	gantt.$groupMode = true;
+	gantt.groupBy(false);
+    }
+</script>
+</body>
